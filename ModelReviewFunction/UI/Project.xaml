@@ -1,0 +1,174 @@
+﻿<Window x:Class="ModelReviewFunction.UI.ProjectUI"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib;"
+             xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:local="clr-namespace:ModelReviewFunction.UI"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+            xmlns:converter="clr-namespace:ModelReviewFunction.MVVM"
+             mc:Ignorable="d" 
+             Name="projectWindow"
+             Title="模型审查-问题管理功能"
+             d:DesignHeight="450" d:DesignWidth="1200">
+    <Window.Resources>
+        <ResourceDictionary>
+            <converter:Bool2VisibilityConverter x:Key="BoolConverter"/>
+            <ResourceDictionary.MergedDictionaries>
+                <!--<ResourceDictionary Source="WindowThemes.xaml" />-->
+                <materialDesign:BundledTheme BaseTheme="Light" PrimaryColor="DeepPurple" SecondaryColor="Lime"/>
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,5,0">
+            <Button Name="BtnAdd" Width="60" Height="25" Content="新增" Command="{Binding AddProjectCommand}"  Margin="0,0,5,0"/>
+            <Button Name="BtnDel" Width="60" Height="25" Content="删除" Command="{Binding DelProjectCommand}"  Margin="0,0,5,0"/>
+            <Button Name="BtnUpload" Width="60" Height="25" Content="上传" Command="{Binding SaveProjectCommand}" Margin="0,0,5,0"/>
+            <Button Name="BtnDownload" Width="60" Height="25" Content="同步" Command="{Binding UpdateProjectCommand}" Margin="0,0,5,0"/>
+            <Button Name="Btns" Width="100" Height="25" Content="导出Excel" Command="{Binding ExportProjectCommand}"  Margin="0,0,15,0"/>
+        </StackPanel>
+        <DataGrid Grid.Row="1" Name="dataGrid" Margin="0,5,0,0"
+                  ItemsSource="{Binding Projects,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                  SelectedItem="{Binding SelectedProject,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                  RowHeaderWidth="0"
+                  AutoGenerateColumns="False" CanUserAddRows="False" >
+            <DataGrid.Columns>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <!--Content="■" Width="20" Height="20"-->
+                            <ToggleButton HorizontalAlignment="Left"
+                                    ToolTip="全选/全不选" >
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
+                                        <i:InvokeCommandAction Command="{Binding DataContext.CheckedCommand,ElementName=projectWindow }"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </ToggleButton>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsChecked,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Checked">
+                                        <i:InvokeCommandAction Command="{Binding DataContext.SelectedChangedCommand,ElementName=projectWindow}"/>
+                                    </i:EventTrigger>
+                                    <i:EventTrigger EventName="Unchecked">
+                                        <i:InvokeCommandAction Command="{Binding DataContext.SelectedChangedCommand,ElementName=projectWindow}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </CheckBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="项目名称" IsReadOnly="True"  Width="Auto" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock VerticalAlignment="Center" Text="{Binding ProjectName,UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="户型" IsReadOnly="True"  Width="Auto" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock VerticalAlignment="Center" Text="{Binding HouseType,UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="房间分割" Width="200" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <!--<ComboBox SelectedIndex="0" ItemsSource="{Binding Rooms,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                      SelectedItem="{Binding SelectedRoom,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />-->
+                            <!--<ScrollViewer VerticalScrollBarVisibility="Auto" >-->
+                            <!--<Button Command="{Binding DataContext.ChooseRoomCommand, ElementName=projectWindow}"></Button>-->
+                            <TextBox Text="{Binding SelectedRoomName,UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" TextWrapping="WrapWithOverflow">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
+                                        <i:InvokeCommandAction Command="{Binding DataContext.ChooseRoomCommand,ElementName=projectWindow }"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </TextBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="工作系统" Width="200">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding SelectedWorkSystemName,UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" TextWrapping="WrapWithOverflow">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
+                                        <i:InvokeCommandAction Command="{Binding DataContext.ChooseWorkSystemCommand,ElementName=projectWindow}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </TextBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="项目问题数" IsReadOnly="True"  Width="Auto" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock VerticalAlignment="Center" Text="{Binding ProblemNumber,UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn IsReadOnly="True" Width="*" >
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <TextBlock  Text="分数统计">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
+                                        <i:InvokeCommandAction Command="{Binding DataContext.CalculateScoreCommand,ElementName=projectWindow }"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock VerticalAlignment="Center"  Text="{Binding Score,UpdateSourceTrigger=PropertyChanged}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="项目状态" IsReadOnly="True"  Width="*" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock VerticalAlignment="Center" Text="{Binding Status,UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="审核" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button  Content="☛" 
+                                     Command="{Binding OpenProblemSheetCommand}" 
+                                     IsEnabled="{Binding IsEnabled,UpdateSourceTrigger=PropertyChanged}"></Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
+            <!--<Label Content="项目数" />
+            <Label Content="{Binding ProjectNumber,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />-->
+            <materialDesign:Chip Content="项目数" Icon="P" />
+            <materialDesign:Chip Content="{Binding ProjectNumber,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+        <!--<ProgressBar  Grid.Row="2" Style="{StaticResource MaterialDesignCircularProgressBar}" Value="0" IsIndeterminate="True" />-->
+        <local:UControlRoom  VerticalAlignment="Top" Grid.Row="1" Width="200 " Height="300" BorderBrush="DarkGray" BorderThickness="1" Background="WhiteSmoke"
+                             Visibility="{Binding IsRoomViewer,Converter={StaticResource BoolConverter},UpdateSourceTrigger=PropertyChanged}"/>
+        <local:UControlWorkSystem VerticalAlignment="Top" Grid.Row="1" Width="200 " Height="300" BorderBrush="DarkGray" BorderThickness="1" Background="WhiteSmoke"
+                             Visibility="{Binding IsWorkSystemViewer,Converter={StaticResource BoolConverter},UpdateSourceTrigger=PropertyChanged}"/>
+    </Grid>
+</Window>
